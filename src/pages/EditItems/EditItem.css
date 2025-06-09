@@ -1,0 +1,253 @@
+/* Estilos compartilhados entre as páginas */
+
+.content-wrapper {
+  display: flex;
+  min-height: 100vh;
+  background-color: #ffffff;
+  padding: 40px;
+  gap: 60px;
+  font-family: Arial, sans-serif;
+}
+
+.form-section {
+  flex: 1;
+  max-width: 500px;
+  padding: 20px;
+}
+
+.form-section h1 {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 30px;
+  font-weight: 600;
+}
+
+.form-group, .detail-group {
+  margin-bottom: 20px;
+}
+
+.form-group label, .detail-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #555;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.detail-group .detail-value {
+  padding: 12px 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  color: #333;
+  min-height: 20px;
+}
+
+.form-input, .form-select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.form-input:focus, .form-select:focus {
+  border-color: #4A90E2;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  font-size: 16px;
+  outline: none;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.3s;
+}
+
+.form-textarea:focus {
+  border-color: #4A90E2;
+}
+
+.form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 20px;
+  cursor: pointer;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.form-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.btn-white-outline {
+  padding: 12px 24px;
+  background-color: transparent;
+  color: #4A90E2;
+  border: 1px solid #4A90E2;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s;
+}
+
+.btn-white-outline:hover {
+  background-color: #f0f8ff;
+}
+
+.btn-white-primary {
+  padding: 12px 24px;
+  background-color: #4A90E2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.btn-white-primary:hover {
+  background-color: #3a7bc8;
+}
+
+.illustration {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.box-illustration {
+  width: 300px;
+  height: 300px;
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.box {
+  width: 120px;
+  height: 80px;
+  position: relative;
+  transform: rotateX(15deg) rotateY(-15deg);
+  transform-style: preserve-3d;
+}
+
+.box-top, .box-front, .box-side {
+  position: absolute;
+  background-color: #4A90E2;
+}
+
+.box-top {
+  width: 120px;
+  height: 120px;
+  top: -40px;
+  left: 0;
+  background-color: rgba(74, 144, 226, 0.7);
+  transform: rotateX(90deg) translateZ(40px);
+}
+
+.box-front {
+  width: 120px;
+  height: 80px;
+  top: 0;
+  left: 0;
+  background-color: #4A90E2;
+}
+
+.box-side {
+  width: 120px;
+  height: 80px;
+  top: 0;
+  right: -40px;
+  background-color: rgba(74, 144, 226, 0.8);
+  transform: rotateY(90deg) translateZ(40px);
+}
+
+.tape {
+  position: absolute;
+  background-color: rgba(74, 144, 226, 0.6);
+}
+
+.tape-1 {
+  width: 120px;
+  height: 8px;
+  top: 36px;
+  left: 0;
+  z-index: 10;
+}
+
+.tape-2 {
+  width: 8px;
+  height: 120px;
+  top: -40px;
+  left: 56px;
+  z-index: 10;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.status-badge.in-stock {
+  background-color: rgba(46, 204, 113, 0.1);
+  color: #2ecc71;
+}
+
+.status-badge.out-stock {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+}
+
+@media (max-width: 768px) {
+  .content-wrapper {
+    flex-direction: column;
+    padding: 20px;
+  }
+  
+  .form-section {
+    max-width: 100%;
+  }
+  
+  .illustration {
+    margin-top: 30px;
+  }
+  
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .btn-white-outline, .btn-white-primary {
+    width: 100%;
+  }
+}

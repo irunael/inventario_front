@@ -1,0 +1,229 @@
+/* Estilos específicos para a página de Movimentação */
+
+.form-section {
+    margin: 20px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+  }
+  
+  .form-container {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-container h2 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  .movimentacao-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .form-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .form-group {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form-group label {
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #333;
+    font-size: 0.9rem;
+  }
+  
+  .form-group input,
+  .form-group select {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: border-color 0.3s ease;
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+  }
+  
+  .btn-submit {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn-submit:hover {
+    background: #218838;
+  }
+  
+  .btn-cancel {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn-cancel:hover {
+    background: #545b62;
+  }
+  
+  .table-section {
+    margin-top: 30px;
+  }
+  
+  .table-section h2 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+  
+  .movimentacoes-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .movimentacoes-table th {
+    background: #f8f9fa;
+    padding: 15px 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #dee2e6;
+    font-size: 0.9rem;
+  }
+  
+  .movimentacoes-table td {
+    padding: 12px;
+    border-bottom: 1px solid #dee2e6;
+    font-size: 0.9rem;
+    color: #555;
+  }
+  
+  .movimentacoes-table tr:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .tipo-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+  
+  .tipo-badge.entrada {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+  
+  .tipo-badge.saída {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+  
+  .tipo-badge.movimentação {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+  }
+  
+  .empty-state {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 30px;
+  }
+  
+  /* Responsividade */
+  @media (max-width: 768px) {
+    .form-row {
+      flex-direction: column;
+    }
+    
+    .form-group {
+      min-width: 100%;
+    }
+    
+    .form-actions {
+      flex-direction: column;
+    }
+    
+    .btn-submit,
+    .btn-cancel {
+      width: 100%;
+    }
+    
+    .movimentacoes-table {
+      font-size: 0.8rem;
+    }
+    
+    .movimentacoes-table th,
+    .movimentacoes-table td {
+      padding: 8px 6px;
+    }
+  }
+  
+  /* Ajustes para campos condicionais */
+  .form-group[style*="display: none"] {
+    display: none !important;
+  }
+  
+  /* Estilo para o botão de movimentar produto no header */
+  .header-actions .btn-new-item {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .header-actions .btn-new-item:hover {
+    background: #0056b3;
+  }
