@@ -166,19 +166,6 @@ const EditItem = () => {
             />
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label>Quantidade</label>
-              <input
-                type="number"
-                name="quantity"
-                value={item.quantity}
-                onChange={handleInputChange}
-                className="form-input"
-                min="0"
-              />
-            </div>
-
             <div className="form-group">
               <label>Preço *</label>
               <input
@@ -192,7 +179,6 @@ const EditItem = () => {
                 required
               />
             </div>
-          </div>
 
           <div className="form-row">
             <div className="form-group">
@@ -209,96 +195,7 @@ const EditItem = () => {
                 ))}
               </select>
             </div>
-
-            <div className="form-group">
-              <label>Status *</label>
-              <select
-                name="inStock"
-                value={item.inStock}
-                onChange={(e) => setItem({...item, inStock: e.target.value === 'true'})}
-                className="form-select"
-              >
-                <option value={true}>Em estoque</option>
-                <option value={false}>Fora de estoque</option>
-              </select>
-            </div>
           </div>
-
-          <div className="form-group">
-            <label>Fornecedor Atual</label>
-            <input
-              type="text"
-              value={item.supplier}
-              className="form-input"
-              readOnly
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Deseja alterar o fornecedor?</label>
-            <div className="supplier-change-options">
-              <label>
-                <input
-                  type="radio"
-                  name="isSupplierChanging"
-                  value="false"
-                  checked={!item.isSupplierChanging}
-                  onChange={handleSupplierChangeToggle}
-                />
-                Não
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="isSupplierChanging"
-                  value="true"
-                  checked={item.isSupplierChanging}
-                  onChange={handleSupplierChangeToggle}
-                />
-                Sim
-              </label>
-            </div>
-          </div>
-
-          {item.isSupplierChanging && (
-            <div className="supplier-change-section">
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Fornecedor Atual</label>
-                  <input
-                    type="text"
-                    value={item.supplier}
-                    className="form-input"
-                    readOnly
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Para</label>
-                  <select
-                    name="newSupplier"
-                    value={item.newSupplier}
-                    onChange={handleInputChange}
-                    className="form-select"
-                    required={item.isSupplierChanging}
-                  >
-                    <option value="">Selecione o novo fornecedor</option>
-                    {availableSuppliers.map(supplier => (
-                      <option key={supplier} value={supplier}>{supplier}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {item.isSupplierChanging && (
-            <div className="form-group">
-              <label>Status</label>
-              <div className="status-movement">
-                <span className="status-badge movement">Em movimentação</span>
-              </div>
-            </div>
-          )}
 
           <div className="form-actions">
             <button

@@ -1,3 +1,4 @@
+// src/pages/Movimentacao.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Movimentacao.css';
@@ -6,26 +7,37 @@ const Movimentacao = () => {
   const navigate = useNavigate();
   const [movimentacoes, setMovimentacoes] = useState([]);
 
-  // Simulação de dados - substitua por sua chamada API real
+  // Carrega movimentações do localStorage ao iniciar
   useEffect(() => {
-    // Exemplo de dados mockados
-    const mockData = [
-      { id: 1, produto: 'Produto A', tipo: 'Entrada', quantidade: 10, data: '2023-05-01', origem: 'DEP001', destino: 'DEP002' },
-      { id: 2, produto: 'Produto B', tipo: 'Saída', quantidade: 5, data: '2023-05-02', origem: 'DEP002', destino: 'DEP001' }
-    ];
-    setMovimentacoes(mockData);
+    const stored = localStorage.getItem('movimentacoes');
+    setMovimentacoes(stored ? JSON.parse(stored) : []);
   }, []);
-
-  const handleEdit = (id) => {
-    navigate(`/movimentacao/${id}/edit`);
-  };
 
   return (
     <div className="dashboard-container">
+      {/* Sidebar */}
       <div className="sidebar">
-        {/* Seu sidebar existente */}
+        <div className="logo">
+          <span className="logo-icon">📦</span>
+          <span className="logo-text">Inbox</span>
+        </div>
+        <nav className="nav-menu">
+          <div className="nav-item" onClick={() => navigate('/dashboard')}>
+            <span className="nav-icon">🏠</span>
+            <span className="nav-text">Dashboard</span>
+          </div>
+          <div className="nav-item" onClick={() => navigate('/items')}>
+            <span className="nav-icon">📋</span>
+            <span className="nav-text">Items</span>
+          </div>
+          <div className="nav-item active">
+            <span className="nav-icon">🔄</span>
+            <span className="nav-text">Movimentação</span>
+          </div>
+        </nav>
       </div>
 
+      {/* Conteúdo Principal */}
       <div className="main-content">
         <div className="header">
           <h1>Movimentações</h1>
@@ -33,45 +45,40 @@ const Movimentacao = () => {
             className="btn-new-item" 
             onClick={() => navigate('/movimentacao-form')}
           >
-            Nova Movimentação
+            Movimentar produto
           </button>
-          <div className="user-icon">👤</div>
+          <div className="user-icon" onClick={() => { /* Lógica de logout */ }}>👤</div>
         </div>
-
+        
         <div className="table-container">
           <table className="items-table">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Produto</th>
-                <th>Tipo</th>
+                <th>Data de alteração</th>
                 <th>Quantidade</th>
-                <th>Data</th>
-                <th>Origem</th>
-                <th>Destino</th>
-                <th>Ações</th>
+                <th>Tipo de movimentação</th>
+                <th>ID do setor de origem</th>
+                <th>ID do setor de destino</th>
+                <th>ID do produto</th>
               </tr>
             </thead>
             <tbody>
-              {movimentacoes.map(mov => (
-                <tr key={mov.id}>
-                  <td>{mov.id}</td>
-                  <td>{mov.produto}</td>
-                  <td>{mov.tipo}</td>
-                  <td>{mov.quantidade}</td>
-                  <td>{mov.data}</td>
-                  <td>{mov.origem}</td>
-                  <td>{mov.destino}</td>
-                  <td>
-                    <button 
-                      className="edit-btn"
-                      onClick={() => handleEdit(mov.id)}
-                    >
-                      Editar
-                    </button>
-                  </td>
+              {movimentacoes.length === 0 ? (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: 'center' }}>Nenhuma movimentação registrada</td>
                 </tr>
-              ))}
+              ) : (
+                movimentacoes.map((mov, idx) => (
+                  <tr key={idx}>
+                    <td>{mov.data}</td>
+                    <td>{mov.quantidade}</td>
+                    <td>{mov.tipo}</td>
+                    <td>{mov.origem}</td>
+                    <td>{mov.destino}</td>
+                    <td>{mov.idProduto}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

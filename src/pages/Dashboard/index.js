@@ -1,3 +1,4 @@
+// src/pages/Dashboard.js
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ItemsContext } from '../../contexts/ItemsContext';
@@ -5,7 +6,7 @@ import './Dashboard.css';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { items } = useContext(ItemsContext);
+  const { items, deleteItem } = useContext(ItemsContext);
 
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -28,6 +29,12 @@ const Dashboard = () => {
   };
   const handleNavigateToItems = () => navigate('/items');
   const handleNavigateToMovement = () => navigate('/movimentacao');
+
+  const handleDeleteItem = (id) => {
+    if (window.confirm("Tem certeza que deseja excluir este item?")) {
+      deleteItem(id);
+    }
+  };
 
   return (
     <div className="dashboard-container">
@@ -115,17 +122,20 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="stock-status">
-                    <span className={`stock-indicator ${item.inStock ? 'in-stock' : 'out-stock'}`}>
+                    <span className={`status-badge ${item.inStock ? 'in-stock' : 'out-stock'}`}>
                       {item.inStock ? 'Em estoque' : 'Fora de estoque'}
                     </span>
-                    {item.status === 'em movimentação' && (
-                      <span className="status-badge movement">Em movimentação</span>
+                    {item.status && item.status !== 'normal' && (
+                      <span className={`status-badge ${item.status.toLowerCase().replace(' ', '-')}`}>
+                        {item.status}
+                      </span>
                     )}
                   </div>
                 </div>
                 <div className="product-actions">
                   <button className="btn-view" onClick={() => handleView(item.id)}>Visualizar</button>
                   <button className="btn-edit" onClick={() => handleEdit(item.id)}>Editar</button>
+                  <button className="delete-btn" onClick={() => handleDeleteItem(item.id)}>Excluir</button>
                 </div>
               </div>
             ))

@@ -28,7 +28,16 @@ const routes = [
     path: '/add-item',
     component: 'AddNewItem',
     auth: true
+  },
+  {
+    path: '/movimentacao',
+    element: <Movimentacao />
+  },
+  {
+    path: '/movimentacao-form',
+    element: <MovimentacaoForm />
   }
 ];
+
 
 export default routes;

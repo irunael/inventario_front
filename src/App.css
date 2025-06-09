@@ -4,3 +4,50 @@
   display: flex;
   flex-direction: column;
 }
+
+/* Adicione ao seu arquivo CSS principal */
+.stock-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.stock-indicator {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.stock-indicator.in-stock {
+  background-color: #e6f7e6;
+  color: #2e7d32;
+}
+
+.stock-indicator.out-stock {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.entrada {
+  background-color: #e6f7e6;
+  color: #2e7d32;
+}
+
+.status-badge.saída {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.status-badge.em-movimentação {
+  background-color: #fff8e1;
+  color: #ff8f00;
+}

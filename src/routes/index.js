@@ -1,6 +1,5 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import routes from './routes';
 import PrivateRoute from './privateRoute';
 
 // Importações diretas
@@ -10,43 +9,49 @@ import ItemsList from '../pages/Items';
 import ItemDetails from '../pages/DetalhesItems';
 import EditItem from '../pages/EditItems';
 import AddNewItem from '../pages/AddItems';
+import Movimentacao from '../pages/Movimentacao';
 import MovimentacaoForm from '../pages/MovimentacaoForm';
-import Movimentacao from '../pages/Movimentacao'; // Importe a página de visualização
-import MovEdit from '../pages/MovEdit'; // Importe a página de edição
 
 const RouterConfig = () => {
   return (
     <Routes>
-      {routes.map((route, index) => {
-        const Component = {
-          Login,
-          Dashboard,
-          ItemsList,
-          ItemDetails,
-          EditItem,
-          AddNewItem,
-          MovimentacaoForm,
-          Movimentacao, // Adicione ao objeto de componentes
-          MovEdit // Adicione ao objeto de componentes
-        }[route.component];
-        
-        return (
-          <Route
-            key={index}
-            path={route.path}
-            element={
-              route.auth ? (
-                <PrivateRoute>
-                  <Component />
-                </PrivateRoute>
-              ) : (
-                <Component />
-              )
-            }
-          />
-        );
-      })}
-      
+      <Route path="/login" element={<Login />} />
+      <Route path="/dashboard" element={
+        <PrivateRoute>
+          <Dashboard />
+        </PrivateRoute>
+      } />
+      <Route path="/items" element={
+        <PrivateRoute>
+          <ItemsList />
+        </PrivateRoute>
+      } />
+      <Route path="/item/:id" element={
+        <PrivateRoute>
+          <ItemDetails />
+        </PrivateRoute>
+      } />
+      <Route path="/item/:id/edit" element={
+        <PrivateRoute>
+          <EditItem />
+        </PrivateRoute>
+      } />
+      <Route path="/add-item" element={
+        <PrivateRoute>
+          <AddNewItem />
+        </PrivateRoute>
+      } />
+      <Route path="/movimentacao" element={
+        <PrivateRoute>
+          <Movimentacao />
+        </PrivateRoute>
+      } />
+      <Route path="/movimentacao-form" element={
+        <PrivateRoute>
+          <MovimentacaoForm />
+        </PrivateRoute>
+      } />
+
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<div>404 - Page Not Found</div>} />
     </Routes>

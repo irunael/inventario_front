@@ -3,18 +3,15 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import './Auth.css';
 
-const Register = () => {
+const Login = () => {
   const [formData, setFormData] = useState({
-    nomeCompleto: '',
     email: '',
-    senha: '',
-    confirmarSenha: '',
-    tipo: 'administrador'
+    senha: ''
   });
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -36,13 +33,6 @@ const Register = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    // Validação nome completo
-    if (!formData.nomeCompleto.trim()) {
-      newErrors.nomeCompleto = 'Nome completo é obrigatório';
-    } else if (formData.nomeCompleto.trim().length < 2) {
-      newErrors.nomeCompleto = 'Nome deve ter pelo menos 2 caracteres';
-    }
-
     // Validação email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email) {
@@ -54,15 +44,6 @@ const Register = () => {
     // Validação senha
     if (!formData.senha) {
       newErrors.senha = 'Senha é obrigatória';
-    } else if (formData.senha.length < 6) {
-      newErrors.senha = 'Senha deve ter pelo menos 6 caracteres';
-    }
-
-    // Validação confirmar senha
-    if (!formData.confirmarSenha) {
-      newErrors.confirmarSenha = 'Confirmação de senha é obrigatória';
-    } else if (formData.senha !== formData.confirmarSenha) {
-      newErrors.confirmarSenha = 'As senhas não coincidem';
     }
 
     return newErrors;
@@ -81,11 +62,10 @@ const Register = () => {
     setErrors({});
 
     try {
-      const result = register(formData);
+      const result = login(formData.email, formData.senha);
       
       if (result.success) {
-        alert('Cadastro realizado com sucesso! Agora você pode fazer login.');
-        navigate('/login');
+        navigate('/dashboard');
       } else {
         setErrors({ submit: result.message });
       }
@@ -106,30 +86,17 @@ const Register = () => {
               <h1>Inbox</h1>
             </div>
             <nav className="nav-links">
-              <Link to="/login" className="auth-nav-btn">
-                Já tem conta? Faça Login
+              <Link to="/register" className="auth-nav-btn">
+                Não tem conta? Cadastre-se
               </Link>
             </nav>
           </div>
           
           <div className="form-content">
-            <h2>Criar Nova Conta</h2>
-            <p className="form-subtitle">Preencha seus dados para criar uma conta</p>
+            <h2>Entrar na sua conta</h2>
+            <p className="form-subtitle">Digite seus dados para acessar o sistema</p>
             
             <form onSubmit={handleSubmit} className="auth-form">
-              <div className="input-group">
-                <label htmlFor="nomeCompleto">Nome completo:</label>
-                <input
-                  type="text"
-                  id="nomeCompleto"
-                  name="nomeCompleto"
-                  value={formData.nomeCompleto}
-                  onChange={handleChange}
-                  className={errors.nomeCompleto ? 'error' : ''}
-                />
-                {errors.nomeCompleto && <span className="error-message">{errors.nomeCompleto}</span>}
-              </div>
-              
               <div className="input-group">
                 <label htmlFor="email">Email:</label>
                 <input
@@ -139,6 +106,7 @@ const Register = () => {
                   value={formData.email}
                   onChange={handleChange}
                   className={errors.email ? 'error' : ''}
+                  placeholder="seu@email.com"
                 />
                 {errors.email && <span className="error-message">{errors.email}</span>}
               </div>
@@ -152,60 +120,22 @@ const Register = () => {
                   value={formData.senha}
                   onChange={handleChange}
                   className={errors.senha ? 'error' : ''}
+                  placeholder="Sua senha"
                 />
                 {errors.senha && <span className="error-message">{errors.senha}</span>}
-              </div>
-              
-              <div className="input-group">
-                <label htmlFor="confirmarSenha">Confirmar senha:</label>
-                <input
-                  type="password"
-                  id="confirmarSenha"
-                  name="confirmarSenha"
-                  value={formData.confirmarSenha}
-                  onChange={handleChange}
-                  className={errors.confirmarSenha ? 'error' : ''}
-                />
-                {errors.confirmarSenha && <span className="error-message">{errors.confirmarSenha}</span>}
-              </div>
-              
-              <div className="radio-group">
-                <label className="radio-group-title">Tipo de usuário:</label>
-                <div className="radio-options">
-                  <label className="radio-label">
-                    <input
-                      type="radio"
-                      name="tipo"
-                      value="administrador"
-                      checked={formData.tipo === 'administrador'}
-                      onChange={handleChange}
-                    />
-                    <span>Administrador</span>
-                  </label>
-                  <label className="radio-label">
-                    <input
-                      type="radio"
-                      name="tipo"
-                      value="operador"
-                      checked={formData.tipo === 'operador'}
-                      onChange={handleChange}
-                    />
-                    <span>Operador</span>
-                  </label>
-                </div>
               </div>
               
               {errors.submit && <div className="error-message submit-error">{errors.submit}</div>}
               
               <button type="submit" className="auth-submit-btn" disabled={loading}>
-                {loading ? 'Criando conta...' : 'Criar conta'}
+                {loading ? 'Entrando...' : 'Entrar'}
               </button>
             </form>
             
             <p className="auth-link">
-              Já tem uma conta? {' '}
-              <Link to="/login" className="link-button">
-                Faça login aqui
+              Não tem uma conta? {' '}
+              <Link to="/register" className="link-button">
+                Cadastre-se aqui
               </Link>
             </p>
           </div>
@@ -220,7 +150,7 @@ const Register = () => {
           <div className="profile-frame">
             <div className="frame-border">
               <div className="profile-image">
-                <div className="placeholder-icon">👤</div>
+                <div className="placeholder-icon">🔐</div>
               </div>
             </div>
           </div>
@@ -230,4 +160,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Login;

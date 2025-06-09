@@ -1,3 +1,4 @@
+// src/pages/ItemsList.js
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ItemsContext } from '../../contexts/ItemsContext';
@@ -5,7 +6,7 @@ import './ItemsList.css';
 
 const ItemsList = () => {
   const navigate = useNavigate();
-  const { items } = useContext(ItemsContext);
+  const { items, deleteItem } = useContext(ItemsContext); // Adicione deleteItem aqui
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
@@ -43,6 +44,12 @@ const ItemsList = () => {
 
   const handleEditItem = (itemId) => {
     navigate(`/item/${itemId}/edit`);
+  };
+
+  const handleDeleteItem = (id) => {
+    if (window.confirm("Tem certeza que deseja excluir este item?")) {
+      deleteItem(id);
+    }
   };
 
   const handleNavigateToDashboard = () => {
@@ -123,9 +130,9 @@ const ItemsList = () => {
               <option value="">Todos os status</option>
               <option value="In Stock">Em estoque</option>
               <option value="Low Stock">Fora de estoque</option>
-              <option value="Entrada">Entrada de mercadoria</option>
-              <option value="Saída">Saída de mercadoria</option>
-              <option value="Em movimentação">Em movimentação</option>
+              <option value="Entrada">Entrada</option>
+              <option value="Saída">Saída</option>
+              <option value="Transferência">Transferência</option>
             </select>
 
             <select
@@ -174,12 +181,14 @@ const ItemsList = () => {
                     <td>R$ {(item.price || 0).toFixed(2)}</td>
                     <td>{item.inStock ? 'Sim' : 'Não'}</td>
                     <td>
-                      <div className="status-column">
+                      <div className="status-container">
                         <span className={`status-badge ${item.inStock ? 'in-stock' : 'low-stock'}`}>
                           {item.inStock ? 'Em estoque' : 'Fora de estoque'}
                         </span>
-                        {item.status === 'em movimentação' && (
-                          <span className="status-badge movement">Em movimentação</span>
+                        {item.status && item.status !== 'normal' && (
+                          <span className={`status-badge ${item.status.toLowerCase().replace(' ', '-')}`}>
+                            {item.status}
+                          </span>
                         )}
                       </div>
                     </td>
@@ -187,6 +196,7 @@ const ItemsList = () => {
                       <div className="action-buttons">
                         <button className="view-btn" onClick={() => handleViewItem(item.id)}>Visualizar</button>
                         <button className="edit-btn" onClick={() => handleEditItem(item.id)}>Editar</button>
+                        <button className="delete-btn" onClick={() => handleDeleteItem(item.id)}>Excluir</button>
                       </div>
                     </td>
                   </tr>

@@ -1,3 +1,4 @@
+// src/pages/ItemDetails.js
 import React, { useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ItemsContext } from '../../contexts/ItemsContext';
@@ -8,10 +9,8 @@ const ItemDetails = () => {
   const { id } = useParams();
   const { getItemById } = useContext(ItemsContext);
   
-  // Busca o item específico pelo ID da URL usando a função do contexto
   const item = getItemById(id);
 
-  // Se o item não for encontrado, exibe mensagem de erro
   if (!item) {
     return (
       <div className="content-wrapper">
@@ -80,7 +79,7 @@ const ItemDetails = () => {
             </div>
 
             <div className="detail-group">
-              <label>Fornecedor</label>
+              <label>Setor</label>
               <div className="detail-value">{item.supplier || 'Sem fornecedor'}</div>
             </div>
           </div>
@@ -99,8 +98,8 @@ const ItemDetails = () => {
               <div className="detail-group">
                 <label>Status do Item</label>
                 <div className="detail-value">
-                  <span className="status-badge movement">
-                    {item.status === 'em movimentação' ? 'Em movimentação' : item.status}
+                  <span className={`status-badge ${item.status.toLowerCase().replace(' ', '-')}`}>
+                    {item.status}
                   </span>
                 </div>
               </div>

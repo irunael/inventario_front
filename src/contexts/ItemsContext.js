@@ -34,10 +34,16 @@ export const ItemsProvider = ({ children }) => {
     ];
   });
 
-  // Salva os itens no localStorage sempre que houver mudanças
+  const [movimentacoes, setMovimentacoes] = useState(() => {
+    const savedMovimentacoes = localStorage.getItem('movimentacoes');
+    return savedMovimentacoes ? JSON.parse(savedMovimentacoes) : [];
+  });
+
+  // Salva os itens e movimentações no localStorage sempre que houver mudanças
   useEffect(() => {
     localStorage.setItem('inventoryItems', JSON.stringify(items));
-  }, [items]);
+    localStorage.setItem('movimentacoes', JSON.stringify(movimentacoes));
+  }, [items, movimentacoes]);
 
   const addItem = (newItem) => {
     const itemWithId = { 
@@ -49,6 +55,36 @@ export const ItemsProvider = ({ children }) => {
     setItems((prev) => [...prev, itemWithId]);
   };
 
+  const addMovimentacao = (movimentacao) => {
+    const { idProduto, quantidade, tipo, origem, destino } = movimentacao;
+
+    setMovimentacoes(prev => [...prev, movimentacao]); // Adiciona a movimentação ao estado
+
+    setItems(prevItems => {
+      return prevItems.map(item => {
+        if (item.id === parseInt(idProduto)) {
+          let updatedItem = { ...item };
+
+          if (tipo === 'entrada') {
+            updatedItem.quantity += parseInt(quantidade);
+            updatedItem.status = 'Entrada'; // Atualiza o status para 'Entrada'
+          } else if (tipo === 'saída') {
+            updatedItem.quantity -= parseInt(quantidade);
+            updatedItem.status = 'Saída'; // Atualiza o status para 'Saída'
+          } else if (tipo === 'movimentar') {
+            updatedItem.supplier = destino; // Atualiza o fornecedor para o depósito de destino
+            updatedItem.status = 'Transferência'; // Atualiza o status para 'Transferência'
+          }
+
+          return updatedItem;
+        }
+        return item;
+      });
+    });
+
+    return true; // Retorne true se a movimentação for adicionada com sucesso
+  };
+
   const updateItem = (id, updatedItem) => {
     setItems(prevItems => {
       const updatedItems = prevItems.map(item => 
@@ -56,7 +92,6 @@ export const ItemsProvider = ({ children }) => {
           ...item, 
           ...updatedItem,
           lastUpdated: new Date().toLocaleString('pt-BR'),
-          // Garante que inStock seja atualizado baseado na quantidade se não for especificado
           inStock: updatedItem.inStock !== undefined ? updatedItem.inStock : (updatedItem.quantity > 0)
         } : item
       );
@@ -76,9 +111,11 @@ export const ItemsProvider = ({ children }) => {
     <ItemsContext.Provider value={{ 
       items, 
       addItem, 
+      addMovimentacao, 
       updateItem, 
       deleteItem, 
-      getItemById 
+      getItemById,
+      movimentacoes // Adiciona movimentações ao contexto
     }}>
       {children}
     </ItemsContext.Provider>

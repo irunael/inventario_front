@@ -206,23 +206,59 @@
   z-index: 10;
 }
 
+/* Estilos para os novos status */
 .status-badge {
   display: inline-block;
-  padding: 4px 12px;
+  padding: 4px 10px;
   border-radius: 12px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
+  margin: 2px;
+  white-space: nowrap;
 }
 
+/* Status: Em estoque */
 .status-badge.in-stock {
-  background-color: rgba(46, 204, 113, 0.1);
-  color: #2ecc71;
+  background-color: #e6f7e6; /* Verde claro */
+  color: #2e7d32; /* Verde escuro */
+  border: 1px solid #a5d6a7;
 }
 
+/* Status: Fora de estoque */
 .status-badge.out-stock {
-  background-color: rgba(231, 76, 60, 0.1);
-  color: #e74c3c;
+  background-color: #ffebee; /* Vermelho claro */
+  color: #c62828; /* Vermelho escuro */
+  border: 1px solid #ef9a9a;
 }
+
+/* Status: Entrada */
+.status-badge.entrada {
+  background-color: #e8f5e9; /* Verde claro */
+  color: #1b5e20; /* Verde escuro */
+  border: 1px solid #81c784;
+}
+
+/* Status: Saída */
+.status-badge.saida {
+  background-color: #ffebee; /* Vermelho claro */
+  color: #b71c1c; /* Vermelho escuro */
+  border: 1px solid #ef9a9a;
+}
+
+/* Status: Transferência */
+.status-badge.transferencia {
+  background-color: #fff8e1; /* Laranja claro */
+  color: #e65100; /* Laranja escuro */
+  border: 1px solid #ffcc80;
+}
+
+/* Efeito hover para interatividade */
+.status-badge:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
 
 @media (max-width: 768px) {
   .content-wrapper {
