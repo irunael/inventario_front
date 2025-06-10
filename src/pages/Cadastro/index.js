@@ -14,6 +14,7 @@ const Register = () => {
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -24,7 +25,6 @@ const Register = () => {
       [name]: value
     }));
     
-    // Limpa o erro do campo quando o usuário começa a digitar
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -36,14 +36,12 @@ const Register = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    // Validação nome completo
     if (!formData.nomeCompleto.trim()) {
       newErrors.nomeCompleto = 'Nome completo é obrigatório';
     } else if (formData.nomeCompleto.trim().length < 2) {
       newErrors.nomeCompleto = 'Nome deve ter pelo menos 2 caracteres';
     }
 
-    // Validação email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email) {
       newErrors.email = 'Email é obrigatório';
@@ -51,14 +49,12 @@ const Register = () => {
       newErrors.email = 'Email inválido';
     }
 
-    // Validação senha
     if (!formData.senha) {
       newErrors.senha = 'Senha é obrigatória';
     } else if (formData.senha.length < 6) {
       newErrors.senha = 'Senha deve ter pelo menos 6 caracteres';
     }
 
-    // Validação confirmar senha
     if (!formData.confirmarSenha) {
       newErrors.confirmarSenha = 'Confirmação de senha é obrigatória';
     } else if (formData.senha !== formData.confirmarSenha) {
@@ -81,11 +77,21 @@ const Register = () => {
     setErrors({});
 
     try {
-      const result = register(formData);
+      const result = await register(formData);
       
       if (result.success) {
-        alert('Cadastro realizado com sucesso! Agora você pode fazer login.');
-        navigate('/login');
+        // Mostra mensagem de sucesso
+        setSuccessMessage('Usuário cadastrado com sucesso! Redirecionando para o login...');
+        
+        // Redireciona para login após 2 segundos
+        setTimeout(() => {
+          navigate('/login', { 
+            state: { 
+              message: 'Cadastro realizado com sucesso! Faça login para continuar.',
+              email: formData.email // Opcional: pré-preencher o email no login
+            } 
+          });
+        }, 2000);
       } else {
         setErrors({ submit: result.message });
       }
@@ -116,6 +122,14 @@ const Register = () => {
             <h2>Criar Nova Conta</h2>
             <p className="form-subtitle">Preencha seus dados para criar uma conta</p>
             
+            {/* Mensagem de sucesso */}
+            {successMessage && (
+              <div className="success-message">
+                <span className="success-icon">✅</span>
+                {successMessage}
+              </div>
+            )}
+            
             <form onSubmit={handleSubmit} className="auth-form">
               <div className="input-group">
                 <label htmlFor="nomeCompleto">Nome completo:</label>
@@ -126,6 +140,7 @@ const Register = () => {
                   value={formData.nomeCompleto}
                   onChange={handleChange}
                   className={errors.nomeCompleto ? 'error' : ''}
+                  disabled={loading || successMessage}
                 />
                 {errors.nomeCompleto && <span className="error-message">{errors.nomeCompleto}</span>}
               </div>
@@ -139,6 +154,7 @@ const Register = () => {
                   value={formData.email}
                   onChange={handleChange}
                   className={errors.email ? 'error' : ''}
+                  disabled={loading || successMessage}
                 />
                 {errors.email && <span className="error-message">{errors.email}</span>}
               </div>
@@ -152,6 +168,7 @@ const Register = () => {
                   value={formData.senha}
                   onChange={handleChange}
                   className={errors.senha ? 'error' : ''}
+                  disabled={loading || successMessage}
                 />
                 {errors.senha && <span className="error-message">{errors.senha}</span>}
               </div>
@@ -165,6 +182,7 @@ const Register = () => {
                   value={formData.confirmarSenha}
                   onChange={handleChange}
                   className={errors.confirmarSenha ? 'error' : ''}
+                  disabled={loading || successMessage}
                 />
                 {errors.confirmarSenha && <span className="error-message">{errors.confirmarSenha}</span>}
               </div>
@@ -179,6 +197,7 @@ const Register = () => {
                       value="administrador"
                       checked={formData.tipo === 'administrador'}
                       onChange={handleChange}
+                      disabled={loading || successMessage}
                     />
                     <span>Administrador</span>
                   </label>
@@ -189,6 +208,7 @@ const Register = () => {
                       value="operador"
                       checked={formData.tipo === 'operador'}
                       onChange={handleChange}
+                      disabled={loading || successMessage}
                     />
                     <span>Operador</span>
                   </label>
@@ -197,17 +217,23 @@ const Register = () => {
               
               {errors.submit && <div className="error-message submit-error">{errors.submit}</div>}
               
-              <button type="submit" className="auth-submit-btn" disabled={loading}>
-                {loading ? 'Criando conta...' : 'Criar conta'}
+              <button 
+                type="submit" 
+                className="auth-submit-btn" 
+                disabled={loading || successMessage}
+              >
+                {loading ? 'Criando conta...' : successMessage ? 'Redirecionando...' : 'Criar conta'}
               </button>
             </form>
             
-            <p className="auth-link">
-              Já tem uma conta? {' '}
-              <Link to="/login" className="link-button">
-                Faça login aqui
-              </Link>
-            </p>
+            {!successMessage && (
+              <p className="auth-link">
+                Já tem uma conta? {' '}
+                <Link to="/login" className="link-button">
+                  Faça login aqui
+                </Link>
+              </p>
+            )}
           </div>
         </div>
         

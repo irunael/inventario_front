@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import './Auth.css';
 
 const Login = () => {
@@ -11,8 +11,30 @@ const Login = () => {
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Verifica se há mensagem de sucesso do registro
+  useEffect(() => {
+    if (location.state?.message) {
+      setSuccessMessage(location.state.message);
+      
+      // Se houver email do registro, pré-preenche o campo
+      if (location.state.email) {
+        setFormData(prev => ({
+          ...prev,
+          email: location.state.email
+        }));
+      }
+      
+      // Remove a mensagem após 5 segundos
+      setTimeout(() => {
+        setSuccessMessage('');
+      }, 5000);
+    }
+  }, [location.state]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,7 +43,6 @@ const Login = () => {
       [name]: value
     }));
     
-    // Limpa o erro do campo quando o usuário começa a digitar
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -33,7 +54,6 @@ const Login = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    // Validação email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email) {
       newErrors.email = 'Email é obrigatório';
@@ -41,7 +61,6 @@ const Login = () => {
       newErrors.email = 'Email inválido';
     }
 
-    // Validação senha
     if (!formData.senha) {
       newErrors.senha = 'Senha é obrigatória';
     }
@@ -62,9 +81,10 @@ const Login = () => {
     setErrors({});
 
     try {
-      const result = login(formData.email, formData.senha);
+      const result = await login(formData.email, formData.senha);
       
       if (result.success) {
+        // Redireciona para o dashboard após login bem-sucedido
         navigate('/dashboard');
       } else {
         setErrors({ submit: result.message });
@@ -95,6 +115,14 @@ const Login = () => {
           <div className="form-content">
             <h2>Entrar na sua conta</h2>
             <p className="form-subtitle">Digite seus dados para acessar o sistema</p>
+            
+            {/* Mensagem de sucesso do registro */}
+            {successMessage && (
+              <div className="success-message">
+                <span className="success-icon">✅</span>
+                {successMessage}
+              </div>
+            )}
             
             <form onSubmit={handleSubmit} className="auth-form">
               <div className="input-group">
