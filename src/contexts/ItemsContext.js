@@ -4,103 +4,141 @@ import React, { createContext, useState, useEffect } from 'react';
 export const ItemsContext = createContext();
 
 export const ItemsProvider = ({ children }) => {
-  const [items, setItems] = useState(() => {
-    const savedItems = localStorage.getItem('inventoryItems');
-    return savedItems ? JSON.parse(savedItems) : [
-      {
-        id: 1,
-        name: 'Produto A',
-        sku: 'SKU001',
-        description: 'Descrição do Produto A',
-        quantity: 10,
-        inStock: true,
-        price: 100,
-        category: 'Eletrônicos',
-        supplier: 'TechSource Inc.',
-        status: 'normal'
-      },
-      {
-        id: 2,
-        name: 'Produto B',
-        sku: 'SKU002',
-        description: 'Descrição do Produto B',
-        quantity: 0,
-        inStock: false,
-        price: 200,
-        category: 'Vestuário',
-        supplier: 'AudioGear Corp.',
-        status: 'normal'
-      }
-    ];
-  });
+  const [items, setItems] = useState([]);
+  const [movimentacoes, setMovimentacoes] = useState([]);
 
-  const [movimentacoes, setMovimentacoes] = useState(() => {
-    const savedMovimentacoes = localStorage.getItem('movimentacoes');
-    return savedMovimentacoes ? JSON.parse(savedMovimentacoes) : [];
-  });
-
-  // Salva os itens e movimentações no localStorage sempre que houver mudanças
   useEffect(() => {
-    localStorage.setItem('inventoryItems', JSON.stringify(items));
-    localStorage.setItem('movimentacoes', JSON.stringify(movimentacoes));
-  }, [items, movimentacoes]);
-
-  const addItem = (newItem) => {
-    const itemWithId = { 
-      ...newItem, 
-      id: Date.now(),
-      lastUpdated: new Date().toLocaleString('pt-BR'),
-      status: newItem.status || 'normal'
-    };
-    setItems((prev) => [...prev, itemWithId]);
-  };
-
-  const addMovimentacao = (movimentacao) => {
-    const { idProduto, quantidade, tipo, origem, destino } = movimentacao;
-
-    setMovimentacoes(prev => [...prev, movimentacao]); // Adiciona a movimentação ao estado
-
-    setItems(prevItems => {
-      return prevItems.map(item => {
-        if (item.id === parseInt(idProduto)) {
-          let updatedItem = { ...item };
-
-          if (tipo === 'entrada') {
-            updatedItem.quantity += parseInt(quantidade);
-            updatedItem.status = 'Entrada'; // Atualiza o status para 'Entrada'
-          } else if (tipo === 'saída') {
-            updatedItem.quantity -= parseInt(quantidade);
-            updatedItem.status = 'Saída'; // Atualiza o status para 'Saída'
-          } else if (tipo === 'movimentar') {
-            updatedItem.supplier = destino; // Atualiza o fornecedor para o depósito de destino
-            updatedItem.status = 'Transferência'; // Atualiza o status para 'Transferência'
-          }
-
-          return updatedItem;
+    // Função para buscar os itens do backend
+    const fetchItems = async () => {
+      try {
+        const response = await fetch('/produtos'); // Substitua '/produtos' pelo endpoint correto do seu backend
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-        return item;
+        const data = await response.json();
+        setItems(data);
+      } catch (error) {
+        console.error("Erro ao buscar itens do backend:", error);
+        // Tratar o erro, como exibir uma mensagem para o usuário
+      }
+    };
+
+    // Função para buscar as movimentações do backend
+    const fetchMovimentacoes = async () => {
+      try {
+        const response = await fetch('/movimentacoes'); // Substitua '/movimentacoes' pelo endpoint correto do seu backend
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setMovimentacoes(data);
+      } catch (error) {
+        console.error("Erro ao buscar movimentações do backend:", error);
+        // Tratar o erro, como exibir uma mensagem para o usuário
+      }
+    };
+
+    fetchItems();
+    fetchMovimentacoes();
+  }, []); // Executa apenas uma vez ao montar o componente
+
+  const addItem = async (newItem) => {
+    try {
+      const response = await fetch('/produtos', { // Substitua '/produtos' pelo endpoint correto do seu backend
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newItem),
       });
-    });
-
-    return true; // Retorne true se a movimentação for adicionada com sucesso
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setItems((prev) => [...prev, data]); // Adiciona o novo item ao estado
+    } catch (error) {
+      console.error("Erro ao adicionar item no backend:", error);
+      // Tratar o erro, como exibir uma mensagem para o usuário
+    }
   };
 
-  const updateItem = (id, updatedItem) => {
-    setItems(prevItems => {
-      const updatedItems = prevItems.map(item => 
-        item.id === id ? { 
-          ...item, 
-          ...updatedItem,
-          lastUpdated: new Date().toLocaleString('pt-BR'),
-          inStock: updatedItem.inStock !== undefined ? updatedItem.inStock : (updatedItem.quantity > 0)
-        } : item
-      );
-      return updatedItems;
-    });
+  const addMovimentacao = async (movimentacao) => {
+    try {
+      const response = await fetch('/movimentacoes', { // Substitua '/movimentacoes' pelo endpoint correto do seu backend
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(movimentacao),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setMovimentacoes(prev => [...prev, data]); // Adiciona a movimentação ao estado
+      
+      // Após adicionar a movimentação, você pode precisar atualizar os itens
+      // Buscando novamente do backend ou atualizando o estado localmente
+      const fetchItems = async () => {
+        try {
+          const response = await fetch('/produtos'); // Substitua '/produtos' pelo endpoint correto do seu backend
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const data = await response.json();
+          setItems(data);
+        } catch (error) {
+          console.error("Erro ao buscar itens do backend:", error);
+          // Tratar o erro, como exibir uma mensagem para o usuário
+        }
+      };
+      fetchItems();
+
+      return true; // Retorne true se a movimentação for adicionada com sucesso
+    } catch (error) {
+      console.error("Erro ao adicionar movimentação no backend:", error);
+      return false; // Retorne false se a movimentação não foi adicionada
+    }
   };
 
-  const deleteItem = (id) => {
-    setItems(prevItems => prevItems.filter(item => item.id !== id));
+  const updateItem = async (id, updatedItem) => {
+    try {
+      const response = await fetch(`/produtos/${id}`, { // Substitua '/produtos/:id' pelo endpoint correto do seu backend
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedItem),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setItems(prevItems => {
+        const updatedItems = prevItems.map(item => 
+          item.id === id ? data : item // Substitui o item atualizado pelo item retornado do backend
+        );
+        return updatedItems;
+      });
+    } catch (error) {
+      console.error("Erro ao atualizar item no backend:", error);
+      // Tratar o erro, como exibir uma mensagem para o usuário
+    }
+  };
+
+  const deleteItem = async (id) => {
+    try {
+      const response = await fetch(`/produtos/${id}`, { // Substitua '/produtos/:id' pelo endpoint correto do seu backend
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      setItems(prevItems => prevItems.filter(item => item.id !== id));
+    } catch (error) {
+      console.error("Erro ao deletar item no backend:", error);
+      // Tratar o erro, como exibir uma mensagem para o usuário
+    }
   };
 
   const getItemById = (id) => {

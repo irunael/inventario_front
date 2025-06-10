@@ -145,7 +145,7 @@ const EditItem = () => {
           </div>
 
           <div className="form-group">
-            <label>SKU</label>
+            <label>Código</label>
             <input
               type="text"
               name="sku"

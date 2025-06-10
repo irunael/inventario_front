@@ -50,7 +50,7 @@ const ItemDetails = () => {
 
           {item.sku && (
             <div className="detail-group">
-              <label>SKU</label>
+              <label>Codigo</label>
               <div className="detail-value">{item.sku}</div>
             </div>
           )}

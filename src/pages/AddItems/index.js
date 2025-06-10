@@ -87,7 +87,7 @@ const AddNewItem = () => {
           </div>
 
           <div className="form-group">
-            <label>SKU *</label>
+            <label>Código *</label>
             <input
               type="text"
               name="sku"

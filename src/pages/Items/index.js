@@ -140,7 +140,7 @@ const ItemsList = () => {
               onChange={(e) => handleFilterChange('supplier', e.target.value)}
               className="filter-select"
             >
-              <option value="">Todos os fornecedores</option>
+              <option value="">Todos os setores</option>
               {uniqueSuppliers.map(supplier => (
                 <option key={supplier} value={supplier}>{supplier}</option>
               ))}
@@ -153,9 +153,9 @@ const ItemsList = () => {
             <thead>
               <tr>
                 <th>Nome</th>
-                <th>SKU</th>
+                <th>Código</th>
                 <th>Categoria</th>
-                <th>Fornecedor</th>
+                <th>Setor</th>
                 <th>Quantidade</th>
                 <th>Preço</th>
                 <th>Em estoque</th>
