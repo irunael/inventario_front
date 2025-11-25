@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
 import { authService } from '../services/api';
 
 const AuthContext = createContext();
@@ -13,52 +12,68 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await authService.register(userData);
-      const token = response.token; // Assumindo que o backend retorna um token
       
-      localStorage.setItem('authToken', token);
-      const decoded = jwtDecode(token);
-      setUser(decoded);
+      // Backend retorna: { id, nome, email, role }
+      const userInfo = {
+        id: response.id,
+        nomeCompleto: response.nome, // Backend usa "nome"
+        email: response.email,
+        tipo: response.role // Backend usa "role"
+      };
+      
+      localStorage.setItem('user', JSON.stringify(userInfo));
+      setUser(userInfo);
       
       return { success: true, message: 'Cadastro realizado com sucesso!' };
     } catch (error) {
-      return { success: false, message: error.message };
+      console.error('Erro no registro:', error);
+      return { success: false, message: error.message || 'Erro ao registrar usuário' };
     }
   };
 
   const login = async (email, senha) => {
     try {
       const response = await authService.login(email, senha);
-      const token = response.token; // Assumindo que o backend retorna um token
       
-      localStorage.setItem('authToken', token);
-      const decoded = jwtDecode(token);
-      setUser(decoded);
+      // Backend retorna: { token, usuario: { id, nome, email, role }, tipo }
+      // Os dados do usuário estão dentro do campo "usuario"
+      const usuario = response.usuario || response;
+      
+      const userInfo = {
+        id: usuario.id,
+        nomeCompleto: usuario.nome || usuario.nomeCompleto || email,
+        email: usuario.email || email,
+        tipo: usuario.role || 'USUARIO'
+      };
+      
+      console.log('Dados do usuário salvos:', userInfo);
+      
+      localStorage.setItem('user', JSON.stringify(userInfo));
+      setUser(userInfo);
       
       return { success: true, message: 'Login realizado com sucesso!' };
     } catch (error) {
-      return { success: false, message: error.message };
+      console.error('Erro no login:', error);
+      return { success: false, message: error.message || 'Erro ao fazer login' };
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
     setUser(null);
     navigate('/login');
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
+    const storedUser = localStorage.getItem('user');
     
-    if (token) {
+    if (storedUser) {
       try {
-        const decoded = jwtDecode(token);
-        if (decoded.exp * 1000 > Date.now()) {
-          setUser(decoded);
-        } else {
-          localStorage.removeItem('authToken');
-        }
+        const userInfo = JSON.parse(storedUser);
+        setUser(userInfo);
       } catch (error) {
-        localStorage.removeItem('authToken');
+        console.error('Erro ao carregar usuário:', error);
+        localStorage.removeItem('user');
       }
     }
     

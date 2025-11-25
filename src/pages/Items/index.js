@@ -2,11 +2,13 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ItemsContext } from '../../contexts/ItemsContext';
+import { useAuth } from '../../contexts/AuthContext';
 import './ItemsList.css';
 
 const ItemsList = () => {
   const navigate = useNavigate();
-  const { items, deleteItem } = useContext(ItemsContext); // Adicione deleteItem aqui
+  const { items, deleteItem } = useContext(ItemsContext);
+  const { user, logout } = useAuth();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
@@ -22,17 +24,48 @@ const ItemsList = () => {
     }));
   };
 
-  const filteredItems = items.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !filters.category || item.category === filters.category;
-    const matchesStatus = !filters.status || (filters.status === 'In Stock' ? item.inStock : !item.inStock);
-    const matchesSupplier = !filters.supplier || item.supplier === filters.supplier;
+  const filteredItems = items
+    .filter(item => {
+      const itemName = item.name || item.descricao || '';
+      const itemCategory = item.categoria || item.category || '';
+      const itemSupplier = item.setor || item.supplier || '';
+      
+      const matchesSearch = itemName.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = !filters.category || itemCategory === filters.category;
+      const matchesStatus = !filters.status || (filters.status === 'In Stock' ? (item.quantidade || item.quantity || 0) > 0 : (item.quantidade || item.quantity || 0) === 0);
+      const matchesSupplier = !filters.supplier || itemSupplier === filters.supplier;
 
-    return matchesSearch && matchesCategory && matchesStatus && matchesSupplier;
-  });
+      return matchesSearch && matchesCategory && matchesStatus && matchesSupplier;
+    })
+    .sort((a, b) => {
+      const nameA = a.name || a.descricao || '';
+      const nameB = b.name || b.descricao || '';
+      return nameA.localeCompare(nameB);
+    }); // Ordenação alfabética
 
-  const uniqueCategories = [...new Set(items.map(item => item.category).filter(Boolean))];
-  const uniqueSuppliers = [...new Set(items.map(item => item.supplier).filter(Boolean))];
+  // Categorias fixas (mesmas do formulário de cadastro)
+  const categorias = [
+    'Smartphone',
+    'Notebook',
+    'Computador',
+    'Mouse',
+    'Teclado',
+    'Monitor',
+    'Smart TV',
+    'Tablet',
+    'Fone de Ouvido',
+    'Impressora',
+    'Webcam',
+    'Roteador'
+  ];
+
+  // Setores fixos (mesmos do formulário de cadastro)
+  const setores = [
+    'TechSource Inc.',
+    'AudioGear Corp.',
+    'Print Solutions Ltd.',
+    'VisualTech Co.'
+  ];
 
   const handleNewItem = () => {
     navigate('/add-item');
@@ -46,9 +79,15 @@ const ItemsList = () => {
     navigate(`/item/${itemId}/edit`);
   };
 
-  const handleDeleteItem = (id) => {
+  const handleDeleteItem = async (id) => {
     if (window.confirm("Tem certeza que deseja excluir este item?")) {
-      deleteItem(id);
+      try {
+        await deleteItem(id);
+        alert('Produto excluído com sucesso!');
+      } catch (error) {
+        console.error('Erro ao excluir produto:', error);
+        alert(`Erro ao excluir produto: ${error.message || 'Tente novamente'}`);
+      }
     }
   };
 
@@ -57,8 +96,7 @@ const ItemsList = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    navigate('/login');
+    logout();
   };
 
   const handleNavigateToMovement = () => {
@@ -79,7 +117,7 @@ const ItemsList = () => {
           </div>
           <div className="nav-item active">
             <span className="nav-icon">📋</span>
-            <span className="nav-text">Items</span>
+            <span className="nav-text">Itens</span>
           </div>
           <div className="nav-item" onClick={handleNavigateToMovement}>
             <span className="nav-icon">🔄</span>
@@ -90,12 +128,13 @@ const ItemsList = () => {
 
       <div className="main-content">
         <div className="header">
-          <h1>Items</h1>
-          <div className="header-actions">
-            <button className="generate-report-btn">Gerar relatório</button>
-            <button className="btn-new-item" onClick={handleNewItem}>Novo item</button>
+          <h1>Itens</h1>
+          <button className="btn-new-item" onClick={handleNewItem}>Novo item</button>
+          <div className="user-profile">
+            <span className="user-icon">👤</span>
+            <span className="user-name">{user?.nomeCompleto || user?.email || 'Usuário'}</span>
+            <button className="btn-logout" onClick={handleLogout}>Sair</button>
           </div>
-          <div className="user-icon" onClick={handleLogout}>👤</div>
         </div>
 
         <div className="search-section">
@@ -103,7 +142,7 @@ const ItemsList = () => {
             <span className="search-icon">🔍</span>
             <input
               type="text"
-              placeholder="Search items..."
+              placeholder="Busque produtos pelo nome"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
@@ -117,8 +156,8 @@ const ItemsList = () => {
               className="filter-select"
             >
               <option value="">Todas as categorias</option>
-              {uniqueCategories.map(category => (
-                <option key={category} value={category}>{category}</option>
+              {categorias.map(categoria => (
+                <option key={categoria} value={categoria}>{categoria}</option>
               ))}
             </select>
 
@@ -130,9 +169,6 @@ const ItemsList = () => {
               <option value="">Todos os status</option>
               <option value="In Stock">Em estoque</option>
               <option value="Low Stock">Fora de estoque</option>
-              <option value="Entrada">Entrada</option>
-              <option value="Saída">Saída</option>
-              <option value="Transferência">Transferência</option>
             </select>
 
             <select
@@ -141,8 +177,8 @@ const ItemsList = () => {
               className="filter-select"
             >
               <option value="">Todos os setores</option>
-              {uniqueSuppliers.map(supplier => (
-                <option key={supplier} value={supplier}>{supplier}</option>
+              {setores.map(setor => (
+                <option key={setor} value={setor}>{setor}</option>
               ))}
             </select>
           </div>
@@ -153,12 +189,11 @@ const ItemsList = () => {
             <thead>
               <tr>
                 <th>Nome</th>
-                <th>Código</th>
                 <th>Categoria</th>
                 <th>Setor</th>
                 <th>Quantidade</th>
+                <th>Estoque Mínimo</th>
                 <th>Preço</th>
-                <th>Em estoque</th>
                 <th>Status</th>
                 <th>Ações</th>
               </tr>
@@ -166,41 +201,53 @@ const ItemsList = () => {
             <tbody>
               {filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan="9" className="empty-state">
+                  <td colSpan="8" className="empty-state">
                     Nenhum item encontrado
                   </td>
                 </tr>
               ) : (
-                filteredItems.map(item => (
-                  <tr key={item.id}>
-                    <td className="item-name">{item.name}</td>
-                    <td>{item.sku || '-'}</td>
-                    <td>{item.category || '-'}</td>
-                    <td>{item.supplier || '-'}</td>
-                    <td>{item.quantity || 0}</td>
-                    <td>R$ {(item.price || 0).toFixed(2)}</td>
-                    <td>{item.inStock ? 'Sim' : 'Não'}</td>
-                    <td>
-                      <div className="status-container">
-                        <span className={`status-badge ${item.inStock ? 'in-stock' : 'low-stock'}`}>
-                          {item.inStock ? 'Em estoque' : 'Fora de estoque'}
-                        </span>
-                        {item.status && item.status !== 'normal' && (
-                          <span className={`status-badge ${item.status.toLowerCase().replace(' ', '-')}`}>
-                            {item.status}
+                filteredItems.map(item => {
+                  // Mapeia os campos do backend para o frontend
+                  const quantidade = item.quantidade || item.quantity || 0;
+                  const categoria = item.categoria || item.category || '-';
+                  const setor = item.setor || item.supplier || '-';
+                  const abaixoDoMinimo = item.estoqueMinimo && quantidade < item.estoqueMinimo;
+                  const itemName = item.descricao || item.name || 'Sem nome';
+                  const itemPrice = item.precoUnitario || item.price || 0;
+                  
+                  return (
+                    <tr key={item.id} className={abaixoDoMinimo ? 'alerta-estoque' : ''}>
+                      <td className="item-name">
+                        {itemName}
+                        {abaixoDoMinimo && <span className="alerta-icon" title="Estoque abaixo do mínimo!">⚠️</span>}
+                      </td>
+                      <td>{categoria}</td>
+                      <td>{setor}</td>
+                      <td className={abaixoDoMinimo ? 'quantidade-baixa' : ''}>{quantidade}</td>
+                      <td>{item.estoqueMinimo !== undefined && item.estoqueMinimo !== null ? item.estoqueMinimo : '-'}</td>
+                      <td>R$ {parseFloat(itemPrice).toFixed(2)}</td>
+                      <td>
+                        <div className="status-container">
+                          <span className={`status-badge ${quantidade > 0 ? 'in-stock' : 'low-stock'}`}>
+                            {quantidade > 0 ? 'Em estoque' : 'Fora de estoque'}
                           </span>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <div className="action-buttons">
-                        <button className="view-btn" onClick={() => handleViewItem(item.id)}>Visualizar</button>
-                        <button className="edit-btn" onClick={() => handleEditItem(item.id)}>Editar</button>
-                        <button className="delete-btn" onClick={() => handleDeleteItem(item.id)}>Excluir</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                          {abaixoDoMinimo && (
+                            <span className="status-badge alerta">
+                              Abaixo do mínimo
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="action-buttons">
+                          <button className="view-btn" onClick={() => handleViewItem(item.id)}>Visualizar</button>
+                          <button className="edit-btn" onClick={() => handleEditItem(item.id)}>Editar</button>
+                          <button className="delete-btn" onClick={() => handleDeleteItem(item.id)}>Excluir</button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

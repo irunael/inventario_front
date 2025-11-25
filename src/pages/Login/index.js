@@ -87,7 +87,9 @@ const Login = () => {
         // Redireciona para o dashboard após login bem-sucedido
         navigate('/dashboard');
       } else {
-        setErrors({ submit: result.message });
+        // Para qualquer erro de autenticação, mostra mensagem genérica
+        // Isso inclui: usuário não existe, senha incorreta, credenciais inválidas, etc.
+        setErrors({ submit: 'Usuário ou senha incorretos. Tente novamente.' });
       }
     } catch (error) {
       setErrors({ submit: 'Erro interno. Tente novamente.' });
@@ -98,7 +100,7 @@ const Login = () => {
 
   return (
     <div className="auth-container">
-      <div className="auth-wrapper">
+      <div className="auth-wrapper auth-wrapper-single">
         <div className="auth-form-section">
           <div className="auth-header">
             <div className="logo">
@@ -135,6 +137,7 @@ const Login = () => {
                   onChange={handleChange}
                   className={errors.email ? 'error' : ''}
                   placeholder="seu@email.com"
+                  disabled={loading}
                 />
                 {errors.email && <span className="error-message">{errors.email}</span>}
               </div>
@@ -149,6 +152,7 @@ const Login = () => {
                   onChange={handleChange}
                   className={errors.senha ? 'error' : ''}
                   placeholder="Sua senha"
+                  disabled={loading}
                 />
                 {errors.senha && <span className="error-message">{errors.senha}</span>}
               </div>
@@ -166,21 +170,6 @@ const Login = () => {
                 Cadastre-se aqui
               </Link>
             </p>
-          </div>
-        </div>
-        
-        <div className="auth-image-section">
-          <div className="geometric-shapes">
-            <div className="shape shape-1"></div>
-            <div className="shape shape-2"></div>
-            <div className="shape shape-3"></div>
-          </div>
-          <div className="profile-frame">
-            <div className="frame-border">
-              <div className="profile-image">
-                <div className="placeholder-icon">🔐</div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

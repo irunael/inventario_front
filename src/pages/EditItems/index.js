@@ -9,17 +9,13 @@ const EditItem = () => {
   const { items, updateItem } = useContext(ItemsContext);
   
   const [item, setItem] = useState({
-    name: '',
-    sku: '',
-    description: '',
+    descricao: '',
+    precoUnitario: 0,
     quantity: 0,
-    price: 0,
     category: '',
     supplier: '',
+    estoqueMinimo: 0,
     inStock: true,
-    isSupplierChanging: false,
-    newSupplier: '',
-    originalSupplier: '',
     status: 'normal'
   });
 
@@ -31,10 +27,14 @@ const EditItem = () => {
     
     if (foundItem) {
       setItem({
-        ...foundItem,
-        originalSupplier: foundItem.supplier,
-        isSupplierChanging: false,
-        newSupplier: '',
+        id: foundItem.id,
+        descricao: foundItem.descricao || foundItem.name || '',
+        precoUnitario: foundItem.precoUnitario || foundItem.price || 0,
+        quantity: foundItem.quantidade || foundItem.quantity || 0,
+        category: foundItem.categoria || foundItem.category || '',
+        supplier: foundItem.setor || foundItem.supplier || '',
+        estoqueMinimo: foundItem.estoqueMinimo || 0,
+        inStock: foundItem.inStock !== undefined ? foundItem.inStock : true,
         status: foundItem.status || 'normal'
       });
     } else {
@@ -52,32 +52,33 @@ const EditItem = () => {
     }));
   };
 
-  const handleSupplierChangeToggle = (e) => {
-    const isChanging = e.target.value === 'true';
-    setItem(prev => ({
-      ...prev,
-      isSupplierChanging: isChanging,
-      newSupplier: isChanging ? '' : prev.supplier,
-      status: isChanging ? 'em movimentação' : 'normal'
-    }));
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!item.name.trim()) {
-      setError('Nome é obrigatório');
+    if (!item.descricao || !item.descricao.trim()) {
+      setError('Descrição é obrigatória');
       return;
     }
 
-    const updatedItem = {
-      ...item,
-      supplier: item.isSupplierChanging ? item.newSupplier : item.supplier,
-      status: item.isSupplierChanging ? 'em movimentação' : 'normal'
-    };
+    if (!item.precoUnitario || parseFloat(item.precoUnitario) <= 0) {
+      setError('Preço deve ser maior que zero');
+      return;
+    }
 
     try {
-      updateItem(item.id, updatedItem);
+      // Prepara todos os dados no formato que o backend aceita
+      const backendData = {
+        descricao: item.descricao,
+        precoUnitario: parseFloat(item.precoUnitario),
+        unidadeMedida: 'UNIDADE',
+        categoria: item.category,
+        setor: item.supplier,
+        quantidade: parseInt(item.quantity),
+        estoqueMinimo: parseInt(item.estoqueMinimo)
+      };
+
+      console.log('Atualizando produto:', backendData);
+      await updateItem(item.id, backendData);
       navigate(`/item/${item.id}`);
     } catch (err) {
       setError('Erro ao salvar item');
@@ -86,7 +87,7 @@ const EditItem = () => {
   };
 
   const handleCancel = () => {
-    navigate(`/item/${item.id}`);
+    navigate(-1); // Volta para a página anterior
   };
 
   if (loading) {
@@ -117,8 +118,7 @@ const EditItem = () => {
     );
   }
 
-  const availableCategories = [...new Set(items.map(item => item.category).filter(Boolean))];
-  const availableSuppliers = [...new Set(items.map(item => item.supplier).filter(Boolean))];
+
 
   return (
     <div className="content-wrapper">
@@ -133,68 +133,95 @@ const EditItem = () => {
         
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Nome *</label>
+            <label>Descrição do Produto *</label>
             <input
               type="text"
-              name="name"
-              value={item.name}
+              name="descricao"
+              value={item.descricao}
               onChange={handleInputChange}
               className="form-input"
+              placeholder="Ex: Notebook Dell Inspiron 15"
               required
             />
           </div>
 
           <div className="form-group">
-            <label>Código</label>
+            <label>Quantidade *</label>
             <input
-              type="text"
-              name="sku"
-              value={item.sku}
+              type="number"
+              name="quantity"
+              value={item.quantity}
               onChange={handleInputChange}
               className="form-input"
+              min="0"
             />
           </div>
 
           <div className="form-group">
-            <label>Descrição</label>
-            <textarea
-              name="description"
-              value={item.description}
+            <label>Estoque Mínimo *</label>
+            <input
+              type="number"
+              name="estoqueMinimo"
+              value={item.estoqueMinimo}
               onChange={handleInputChange}
-              className="form-textarea"
-              rows="3"
+              className="form-input"
+              min="0"
             />
           </div>
 
-            <div className="form-group">
-              <label>Preço *</label>
-              <input
-                type="number"
-                name="price"
-                value={item.price}
-                onChange={handleInputChange}
-                className="form-input"
-                step="0.01"
-                min="0"
-                required
-              />
-            </div>
+          <div className="form-group">
+            <label>Preço Unitário *</label>
+            <input
+              type="number"
+              name="precoUnitario"
+              value={item.precoUnitario}
+              onChange={handleInputChange}
+              className="form-input"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+              required
+            />
+          </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label>Categoria</label>
-              <select
-                name="category"
-                value={item.category}
-                onChange={handleInputChange}
-                className="form-select"
-              >
-                <option value="">Selecione uma categoria</option>
-                {availableCategories.map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
-            </div>
+          <div className="form-group">
+            <label>Categoria *</label>
+            <select
+              name="category"
+              value={item.category}
+              onChange={handleInputChange}
+              className="form-select"
+            >
+              <option value="">Selecione</option>
+              <option value="Smartphone">Smartphone</option>
+              <option value="Notebook">Notebook</option>
+              <option value="Computador">Computador</option>
+              <option value="Mouse">Mouse</option>
+              <option value="Teclado">Teclado</option>
+              <option value="Monitor">Monitor</option>
+              <option value="Smart TV">Smart TV</option>
+              <option value="Tablet">Tablet</option>
+              <option value="Fone de Ouvido">Fone de Ouvido</option>
+              <option value="Impressora">Impressora</option>
+              <option value="Webcam">Webcam</option>
+              <option value="Roteador">Roteador</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Setor *</label>
+            <select
+              name="supplier"
+              value={item.supplier}
+              onChange={handleInputChange}
+              className="form-select"
+            >
+              <option value="">Selecione</option>
+              <option value="TechSource Inc.">TechSource Inc.</option>
+              <option value="AudioGear Corp.">AudioGear Corp.</option>
+              <option value="Print Solutions Ltd.">Print Solutions Ltd.</option>
+              <option value="VisualTech Co.">VisualTech Co.</option>
+            </select>
           </div>
 
           <div className="form-actions">

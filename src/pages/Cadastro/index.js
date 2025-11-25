@@ -9,7 +9,7 @@ const Register = () => {
     email: '',
     senha: '',
     confirmarSenha: '',
-    tipo: 'administrador'
+    tipo: 'usuario'
   });
 
   const [errors, setErrors] = useState({});
@@ -36,25 +36,43 @@ const Register = () => {
   const validateForm = () => {
     const newErrors = {};
 
+    // Validação do nome
     if (!formData.nomeCompleto.trim()) {
       newErrors.nomeCompleto = 'Nome completo é obrigatório';
     } else if (formData.nomeCompleto.trim().length < 2) {
       newErrors.nomeCompleto = 'Nome deve ter pelo menos 2 caracteres';
     }
 
+    // Validação do email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const dominiosValidos = ['gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com', 'icloud.com', 'live.com'];
+    
     if (!formData.email) {
       newErrors.email = 'Email é obrigatório';
     } else if (!emailRegex.test(formData.email)) {
       newErrors.email = 'Email inválido';
+    } else {
+      const dominio = formData.email.split('@')[1]?.toLowerCase();
+      if (!dominiosValidos.includes(dominio)) {
+        newErrors.email = 'Seu email precisa conter um domínio válido, exemplo: @gmail.com, @outlook.com';
+      }
     }
 
+    // Validação da senha
     if (!formData.senha) {
       newErrors.senha = 'Senha é obrigatória';
-    } else if (formData.senha.length < 6) {
-      newErrors.senha = 'Senha deve ter pelo menos 6 caracteres';
+    } else {
+      if (formData.senha.length < 6) {
+        newErrors.senha = 'A senha precisa conter pelo menos 6 dígitos';
+      } else {
+        const temCaracterEspecial = /[!@#$%^&*(),.?":{}|<>]/.test(formData.senha);
+        if (!temCaracterEspecial) {
+          newErrors.senha = 'A senha precisa conter pelo menos um caractere especial (!@#$%^&*...)';
+        }
+      }
     }
 
+    // Validação da confirmação de senha
     if (!formData.confirmarSenha) {
       newErrors.confirmarSenha = 'Confirmação de senha é obrigatória';
     } else if (formData.senha !== formData.confirmarSenha) {
@@ -67,8 +85,11 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    console.log('Formulário submetido');
+    
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
+      console.log('Erros de validação:', formErrors);
       setErrors(formErrors);
       return;
     }
@@ -77,26 +98,32 @@ const Register = () => {
     setErrors({});
 
     try {
+      console.log('Enviando dados para registro:', formData);
       const result = await register(formData);
+      console.log('Resultado do registro:', result);
       
       if (result.success) {
-        // Mostra mensagem de sucesso
-        setSuccessMessage('Usuário cadastrado com sucesso! Redirecionando para o login...');
+        setSuccessMessage('Usuário cadastrado com sucesso! Redirecionando para o dashboard...');
         
-        // Redireciona para login após 2 segundos
+        // Redireciona para dashboard após 1.5 segundos
         setTimeout(() => {
-          navigate('/login', { 
-            state: { 
-              message: 'Cadastro realizado com sucesso! Faça login para continuar.',
-              email: formData.email // Opcional: pré-preencher o email no login
-            } 
-          });
-        }, 2000);
+          navigate('/dashboard');
+        }, 1500);
       } else {
-        setErrors({ submit: result.message });
+        console.error('Falha no registro:', result.message);
+        
+        // Trata mensagens específicas do backend
+        let errorMessage = result.message || 'Erro ao cadastrar usuário';
+        
+        if (errorMessage.toLowerCase().includes('email') && errorMessage.toLowerCase().includes('já')) {
+          errorMessage = 'Email já cadastrado. Por favor, use outro email ou faça login.';
+        }
+        
+        setErrors({ submit: errorMessage });
       }
     } catch (error) {
-      setErrors({ submit: 'Erro interno. Tente novamente.' });
+      console.error('Erro ao cadastrar:', error);
+      setErrors({ submit: error.message || 'Erro interno. Tente novamente.' });
     } finally {
       setLoading(false);
     }
@@ -104,7 +131,7 @@ const Register = () => {
 
   return (
     <div className="auth-container">
-      <div className="auth-wrapper">
+      <div className="auth-wrapper auth-wrapper-single">
         <div className="auth-form-section">
           <div className="auth-header">
             <div className="logo">
@@ -187,33 +214,7 @@ const Register = () => {
                 {errors.confirmarSenha && <span className="error-message">{errors.confirmarSenha}</span>}
               </div>
               
-              <div className="radio-group">
-                <label className="radio-group-title">Tipo de usuário:</label>
-                <div className="radio-options">
-                  <label className="radio-label">
-                    <input
-                      type="radio"
-                      name="tipo"
-                      value="administrador"
-                      checked={formData.tipo === 'administrador'}
-                      onChange={handleChange}
-                      disabled={loading || successMessage}
-                    />
-                    <span>Administrador</span>
-                  </label>
-                  <label className="radio-label">
-                    <input
-                      type="radio"
-                      name="tipo"
-                      value="operador"
-                      checked={formData.tipo === 'operador'}
-                      onChange={handleChange}
-                      disabled={loading || successMessage}
-                    />
-                    <span>Operador</span>
-                  </label>
-                </div>
-              </div>
+
               
               {errors.submit && <div className="error-message submit-error">{errors.submit}</div>}
               
@@ -234,21 +235,6 @@ const Register = () => {
                 </Link>
               </p>
             )}
-          </div>
-        </div>
-        
-        <div className="auth-image-section">
-          <div className="geometric-shapes">
-            <div className="shape shape-1"></div>
-            <div className="shape shape-2"></div>
-            <div className="shape shape-3"></div>
-          </div>
-          <div className="profile-frame">
-            <div className="frame-border">
-              <div className="profile-image">
-                <div className="placeholder-icon">👤</div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

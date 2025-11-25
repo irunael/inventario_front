@@ -44,43 +44,36 @@ const ItemDetails = () => {
         
         <div className="details-content">
           <div className="detail-group">
-            <label>Nome</label>
-            <div className="detail-value">{item.name}</div>
-          </div>
-
-          {item.sku && (
-            <div className="detail-group">
-              <label>Codigo</label>
-              <div className="detail-value">{item.sku}</div>
-            </div>
-          )}
-
-          <div className="detail-group">
-            <label>Descrição</label>
-            <div className="detail-value">{item.description || 'Sem descrição'}</div>
+            <label>Descrição do Produto</label>
+            <div className="detail-value">{item.descricao || item.name || 'Sem descrição'}</div>
           </div>
 
           <div className="detail-row">
             <div className="detail-group">
               <label>Quantidade</label>
-              <div className="detail-value">{item.quantity || 0}</div>
+              <div className="detail-value">{item.quantidade || item.quantity || 0}</div>
             </div>
 
             <div className="detail-group">
-              <label>Preço</label>
-              <div className="detail-value">R$ {(item.price || 0).toFixed(2)}</div>
+              <label>Estoque Mínimo</label>
+              <div className="detail-value">{item.estoqueMinimo || 0}</div>
             </div>
+          </div>
+
+          <div className="detail-group">
+            <label>Preço Unitário</label>
+            <div className="detail-value">R$ {parseFloat(item.precoUnitario || item.price || 0).toFixed(2)}</div>
           </div>
 
           <div className="detail-row">
             <div className="detail-group">
               <label>Categoria</label>
-              <div className="detail-value">{item.category || 'Sem categoria'}</div>
+              <div className="detail-value">{item.categoria || item.category || 'Sem categoria'}</div>
             </div>
 
             <div className="detail-group">
               <label>Setor</label>
-              <div className="detail-value">{item.supplier || 'Sem fornecedor'}</div>
+              <div className="detail-value">{item.setor || item.supplier || 'Sem setor'}</div>
             </div>
           </div>
 
@@ -88,30 +81,23 @@ const ItemDetails = () => {
             <div className="detail-group">
               <label>Status do Estoque</label>
               <div className="detail-value">
-                <span className={`status-badge ${item.inStock ? 'in-stock' : 'out-stock'}`}>
-                  {item.inStock ? 'Em estoque' : 'Fora de estoque'}
+                <span className={`status-badge ${(item.quantidade || item.quantity || 0) > 0 ? 'in-stock' : 'out-stock'}`}>
+                  {(item.quantidade || item.quantity || 0) > 0 ? 'Em estoque' : 'Fora de estoque'}
                 </span>
               </div>
             </div>
 
-            {item.status && item.status !== 'normal' && (
+            {item.estoqueMinimo && (item.quantidade || item.quantity || 0) < item.estoqueMinimo && (
               <div className="detail-group">
-                <label>Status do Item</label>
+                <label>Alerta</label>
                 <div className="detail-value">
-                  <span className={`status-badge ${item.status.toLowerCase().replace(' ', '-')}`}>
-                    {item.status}
+                  <span className="status-badge alerta">
+                    ⚠️ Abaixo do mínimo
                   </span>
                 </div>
               </div>
             )}
           </div>
-
-          {item.lastUpdated && (
-            <div className="detail-group">
-              <label>Última atualização</label>
-              <div className="detail-value">{item.lastUpdated}</div>
-            </div>
-          )}
         </div>
 
         <div className="form-actions">

@@ -12,6 +12,7 @@ import EditItem from '../pages/EditItems';
 import AddNewItem from '../pages/AddItems';
 import Movimentacao from '../pages/Movimentacao';
 import MovimentacaoForm from '../pages/MovimentacaoForm';
+import TestAPI from '../TestAPI';
 
 const RouterConfig = () => {
   return (
@@ -19,6 +20,7 @@ const RouterConfig = () => {
       {/* Rotas públicas */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/test-api" element={<TestAPI />} />
       
       {/* Rotas protegidas */}
       <Route path="/dashboard" element={

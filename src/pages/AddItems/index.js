@@ -8,13 +8,12 @@ const AddNewItem = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    name: '', // Mudei de itemName para name para manter consistência
-    sku: '',
-    description: '',
+    descricao: '',
+    precoUnitario: '',
     quantity: '',
-    price: '',
     category: '',
-    supplier: ''
+    supplier: '',
+    estoqueMinimo: ''
   });
 
   const [errors, setErrors] = useState({});
@@ -33,7 +32,7 @@ const AddNewItem = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    const requiredFields = ['name', 'sku', 'quantity', 'price', 'category', 'supplier'];
+    const requiredFields = ['descricao', 'precoUnitario', 'quantity', 'category', 'supplier', 'estoqueMinimo'];
     
     requiredFields.forEach(field => {
       if (!formData[field]) {
@@ -41,31 +40,51 @@ const AddNewItem = () => {
       }
     });
 
+    // Validação adicional
+    if (formData.precoUnitario && parseFloat(formData.precoUnitario) <= 0) {
+      newErrors.precoUnitario = 'Preço deve ser maior que zero';
+    }
+
+    if (formData.estoqueMinimo && parseInt(formData.estoqueMinimo) <= 0) {
+      newErrors.estoqueMinimo = 'Estoque mínimo deve ser maior que 0';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateForm()) {
       return;
     }
 
-    // Cria o novo item com os dados do formulário
-    const newItem = {
-      ...formData,
-      id: Date.now(), // Gera um ID único
-      inStock: parseInt(formData.quantity) > 0,
-      price: parseFloat(formData.price),
-      quantity: parseInt(formData.quantity)
-    };
+    try {
+      // Prepara todos os dados no formato que o backend aceita
+      const backendData = {
+        descricao: formData.descricao,
+        precoUnitario: parseFloat(formData.precoUnitario),
+        unidadeMedida: 'UNIDADE',
+        categoria: formData.category,
+        setor: formData.supplier,
+        quantidadeInicial: parseInt(formData.quantity),
+        estoqueMinimo: parseInt(formData.estoqueMinimo)
+      };
 
-    // Adiciona o item usando o contexto
-    addItem(newItem);
-    
-    // Redireciona para a página de itens
-    navigate('/items');
+      console.log('Enviando dados para backend:', backendData);
+
+      // Adiciona o item usando o contexto
+      const createdItem = await addItem(backendData);
+      
+      console.log('Item criado com sucesso:', createdItem);
+      
+      // Redireciona para a página de itens
+      navigate('/items');
+    } catch (error) {
+      console.error('Erro ao adicionar item:', error);
+      setErrors({ submit: error.message || 'Erro ao adicionar item. Tente novamente.' });
+    }
   };
 
   return (
@@ -73,40 +92,24 @@ const AddNewItem = () => {
       <div className="form-section">
         <h1>Adicionar novo item</h1>
 
+        {errors.submit && (
+          <div className="error-message submit-error" style={{ marginBottom: '16px', padding: '12px', backgroundColor: '#ffdce0', color: '#86181d', borderRadius: '6px', border: '1px solid #d73a49' }}>
+            {errors.submit}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Nome *</label>
+            <label>Descrição do Produto *</label>
             <input
               type="text"
-              name="name"
-              value={formData.name}
+              name="descricao"
+              value={formData.descricao}
               onChange={handleInputChange}
-              className={`form-input ${errors.name ? 'error' : ''}`}
+              className={`form-input ${errors.descricao ? 'error' : ''}`}
+              placeholder="Ex: Notebook Dell Inspiron 15"
             />
-            {errors.name && <span className="error-message">{errors.name}</span>}
-          </div>
-
-          <div className="form-group">
-            <label>Código *</label>
-            <input
-              type="text"
-              name="sku"
-              value={formData.sku}
-              onChange={handleInputChange}
-              className={`form-input ${errors.sku ? 'error' : ''}`}
-            />
-            {errors.sku && <span className="error-message">{errors.sku}</span>}
-          </div>
-
-          <div className="form-group">
-            <label>Descrição</label>
-            <input
-              type="text"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              className="form-input"
-            />
+            {errors.descricao && <span className="error-message">{errors.descricao}</span>}
           </div>
 
           <div className="form-group">
@@ -123,17 +126,16 @@ const AddNewItem = () => {
           </div>
 
           <div className="form-group">
-            <label>Preço *</label>
+            <label>Estoque Mínimo *</label>
             <input
               type="number"
-              name="price"
-              value={formData.price}
+              name="estoqueMinimo"
+              value={formData.estoqueMinimo}
               onChange={handleInputChange}
-              className={`form-input ${errors.price ? 'error' : ''}`}
-              step="0.01"
-              min="0"
+              className={`form-input ${errors.estoqueMinimo ? 'error' : ''}`}
+              min="1"
             />
-            {errors.price && <span className="error-message">{errors.price}</span>}
+            {errors.estoqueMinimo && <span className="error-message">{errors.estoqueMinimo}</span>}
           </div>
 
           <div className="form-group">
@@ -145,11 +147,18 @@ const AddNewItem = () => {
               className={`form-select ${errors.category ? 'error' : ''}`}
             >
               <option value="">Selecione</option>
-              <option value="Eletrônicos">Eletrônicos</option>
-              <option value="Roupas">Roupas</option>
-              <option value="Alimentos">Alimentos</option>
-              <option value="Acessórios">Acessórios</option>
-              <option value="Material de Escritório">Material de Escritório</option>
+              <option value="Smartphone">Smartphone</option>
+              <option value="Notebook">Notebook</option>
+              <option value="Computador">Computador</option>
+              <option value="Mouse">Mouse</option>
+              <option value="Teclado">Teclado</option>
+              <option value="Monitor">Monitor</option>
+              <option value="Smart TV">Smart TV</option>
+              <option value="Tablet">Tablet</option>
+              <option value="Fone de Ouvido">Fone de Ouvido</option>
+              <option value="Impressora">Impressora</option>
+              <option value="Webcam">Webcam</option>
+              <option value="Roteador">Roteador</option>
             </select>
             {errors.category && <span className="error-message">{errors.category}</span>}
           </div>
@@ -169,6 +178,21 @@ const AddNewItem = () => {
               <option value="VisualTech Co.">VisualTech Co.</option>
             </select>
             {errors.supplier && <span className="error-message">{errors.supplier}</span>}
+          </div>
+
+          <div className="form-group">
+            <label>Preço Unitário *</label>
+            <input
+              type="number"
+              name="precoUnitario"
+              value={formData.precoUnitario}
+              onChange={handleInputChange}
+              className={`form-input ${errors.precoUnitario ? 'error' : ''}`}
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+            />
+            {errors.precoUnitario && <span className="error-message">{errors.precoUnitario}</span>}
           </div>
 
           <div className="form-actions">
